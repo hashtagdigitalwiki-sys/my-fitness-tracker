@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>My Fitness Tracker</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--good:#16a34a;--danger:#dc2626}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--text)}
+header{background:#111827;color:#fff;padding:28px 18px 20px;border-radius:0 0 24px 24px}
+header h1{margin:0;font-size:25px} header p{margin:6px 0 0;color:#cbd5e1;font-size:14px}
+main{max-width:700px;margin:auto;padding:16px 14px 90px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:12px;box-shadow:0 2px 8px #00000008}
+.metric{font-size:25px;font-weight:750;margin-top:5px}.label{font-size:12px;color:var(--muted)}
+.bar{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden;margin-top:9px}.fill{height:100%;background:var(--accent);border-radius:99px}
+h2{font-size:17px;margin:3px 0 12px}button{border:0;border-radius:11px;padding:11px 14px;background:var(--accent);color:white;font-weight:650;cursor:pointer}
+button.secondary{background:#eef2ff;color:#1d4ed8}button.danger{background:#fee2e2;color:#b91c1c}.row{display:flex;gap:8px;align-items:center;justify-content:space-between}
+input,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:15px}.form{display:grid;gap:9px}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.item{padding:11px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.small{font-size:13px;color:var(--muted)}.tabs{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;gap:4px;padding:8px;z-index:5}.tabs button{background:transparent;color:#6b7280;padding:9px 12px}.tabs button.active{background:#eef2ff;color:#1d4ed8}
+section{display:none}.active-section{display:block}.empty{color:var(--muted);font-size:14px;padding:8px 0}
+</style>
+</head>
+<body>
+<header><h1>My Fitness Tracker</h1><p id="date"></p></header>
+<main>
+<section id="dashboard" class="active-section">
+<div class="grid">
+<div class="card"><div class="label">Calories</div><div class="metric"><span id="cal">0</span> <small>/ 2400</small></div><div class="bar"><div id="calbar" class="fill"></div></div></div>
+<div class="card"><div class="label">Protein</div><div class="metric"><span id="pro">0</span> <small>/ 160g</small></div><div class="bar"><div id="probar" class="fill"></div></div></div>
+</div>
+<div class="grid">
+<div class="card"><div class="label">Today's weight</div><div class="metric" id="weight">—</div></div>
+<div class="card"><div class="label">Workout</div><div class="metric" id="workoutCount">0</div><div class="small">exercises logged</div></div>
+</div>
+<div class="card"><h2>Today's Food</h2><div id="todayFood"></div></div>
+<div class="card"><h2>Today's Workout</h2><div id="todayWorkout"></div></div>
+</section>
+
+<section id="food">
+<div class="card"><h2>Add Food</h2><div class="form">
+<input id="foodName" placeholder="Food name">
+<div class="two"><input id="foodQty" placeholder="Quantity (e.g. 250g)"><select id="meal"><option>Breakfast</option><option>Lunch</option><option>Snack</option><option>Dinner</option></select></div>
+<div class="two"><input id="foodCal" type="number" placeholder="Calories"><input id="foodPro" type="number" placeholder="Protein (g)"></div>
+<button onclick="addFood()">Add food</button></div></div>
+<div class="card"><h2>Food History</h2><div id="foodHistory"></div></div>
+</section>
+
+<section id="workout">
+<div class="card"><h2>Log Exercise</h2><div class="form">
+<input id="exName" placeholder="Exercise (e.g. Bench Press)">
+<div class="two"><input id="exSets" type="number" placeholder="Sets"><input id="exReps" type="number" placeholder="Reps"></div>
+<div class="two"><input id="exWeight" type="number" placeholder="Weight (kg)"><input id="exNote" placeholder="Note (optional)"></div>
+<button onclick="addWorkout()">Save exercise</button></div></div>
+<div class="card"><h2>Workout History</h2><div id="workoutHistory"></div></div>
+</section>
+
+<section id="progress">
+<div class="card"><h2>Log Weight</h2><div class="two"><input id="bodyWeight" type="number" step="0.1" placeholder="Weight (kg)"><button onclick="addWeight()">Save</button></div></div>
+<div class="card"><h2>Progress</h2><div id="progressHistory"></div></div>
+</section>
+
+<section id="settings">
+<div class="card"><h2>Targets</h2><div class="form">
+<div class="two"><input id="targetCal" type="number" value="2400" placeholder="Calories"><input id="targetPro" type="number" value="160" placeholder="Protein"></div>
+<button onclick="saveTargets()">Save targets</button></div></div>
+<div class="card"><h2>Data</h2><div class="row"><button class="secondary" onclick="exportData()">Export backup</button><button class="danger" onclick="clearData()">Clear all data</button></div><p class="small">Your entries are stored in this browser on this device.</p></div>
+</section>
+</main>
+<nav class="tabs">
+<button class="active" onclick="show('dashboard',this)">Home</button><button onclick="show('food',this)">Food</button><button onclick="show('workout',this)">Workout</button><button onclick="show('progress',this)">Progress</button><button onclick="show('settings',this)">Settings</button>
+</nav>
+<script>
+const KEY='myFitnessTracker_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'{"foods":[],"workouts":[],"weights":[],"targets":{"cal":2400,"pro":160}}');
+const today=()=>new Date().toISOString().slice(0,10);
+function save(){localStorage.setItem(KEY,JSON.stringify(db));render()}
+function show(id,btn){document.querySelectorAll('section').forEach(x=>x.classList.remove('active-section'));document.getElementById(id).classList.add('active-section');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');render()}
+function addFood(){let n=foodName.value.trim();if(!n)return;db.foods.unshift({date:today(),name:n,qty:foodQty.value,meal:meal.value,cal:+foodCal.value||0,pro:+foodPro.value||0});foodName.value=foodQty.value=foodCal.value=foodPro.value='';save()}
+function addWorkout(){let n=exName.value.trim();if(!n)return;db.workouts.unshift({date:today(),name:n,sets:+exSets.value||0,reps:+exReps.value||0,weight:+exWeight.value||0,note:exNote.value});exName.value=exSets.value=exReps.value=exWeight.value=exNote.value='';save()}
+function addWeight(){if(!bodyWeight.value)return;db.weights.unshift({date:today(),weight:+bodyWeight.value});bodyWeight.value='';save()}
+function saveTargets(){db.targets={cal:+targetCal.value||2400,pro:+targetPro.value||160};save()}
+function del(type,i){db[type].splice(i,1);save()}
+function render(){
+ date.textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ let f=db.foods.filter(x=>x.date===today()), w=db.workouts.filter(x=>x.date===today()), wt=db.weights.find(x=>x.date===today());
+ let c=f.reduce((a,x)=>a+x.cal,0),p=f.reduce((a,x)=>a+x.pro,0);cal.textContent=c;pro.textContent=p;calbar.style.width=Math.min(100,c/db.targets.cal*100)+'%';probar.style.width=Math.min(100,p/db.targets.pro*100)+'%';weight.textContent=wt?wt.weight+' kg':'—';workoutCount.textContent=w.length;
+ targetCal.value=db.targets.cal;targetPro.value=db.targets.pro;
+ todayFood.innerHTML=f.length?f.map(x=>`<div class="item"><b>${x.name}</b> <span class="small">${x.qty||''} · ${x.meal}</span><br><span class="small">${x.cal} kcal · ${x.pro}g protein</span></div>`).join(''):'<div class="empty">No food logged today.</div>';
+ todayWorkout.innerHTML=w.length?w.map(x=>`<div class="item"><b>${x.name}</b><br><span class="small">${x.sets} sets × ${x.reps} reps · ${x.weight} kg ${x.note?'· '+x.note:''}</span></div>`).join(''):'<div class="empty">No exercises logged today.</div>';
+ foodHistory.innerHTML=db.foods.length?db.foods.map((x,i)=>`<div class="item"><b>${x.name}</b> <span class="small">${x.date} · ${x.meal}</span><br>${x.qty||''} · ${x.cal} kcal · ${x.pro}g protein <button class="danger" style="float:right;padding:5px 8px" onclick="del('foods',${i})">Delete</button></div>`).join(''):'<div class="empty">No food history.</div>';
+ workoutHistory.innerHTML=db.workouts.length?db.workouts.map((x,i)=>`<div class="item"><b>${x.name}</b> <span class="small">${x.date}</span><br>${x.sets} × ${x.reps} · ${x.weight} kg ${x.note?'· '+x.note:''} <button class="danger" style="float:right;padding:5px 8px" onclick="del('workouts',${i})">Delete</button></div>`).join(''):'<div class="empty">No workout history.</div>';
+ progressHistory.innerHTML=db.weights.length?db.weights.map((x,i)=>`<div class="item"><b>${x.weight} kg</b> <span class="small">${x.date}</span><button class="danger" style="float:right;padding:5px 8px" onclick="del('weights',${i})">Delete</button></div>`).join(''):'<div class="empty">No weight entries.</div>';
+}
+function exportData(){let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='fitness-backup.json';a.click()}
+function clearData(){if(confirm('Delete all fitness data?')){localStorage.removeItem(KEY);location.reload()}}
+render();
+</script>
+</body></html>
